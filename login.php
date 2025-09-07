@@ -1,7 +1,15 @@
 <?php
 session_start();
 $errors = [];
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+$blockKey = 'login_block_' . ($_POST['email'] ?? $_SERVER['REMOTE_ADDR']);
+$maxAttempts = 3;
+$blockDuration = 60 * 5; // 5 minutes
+if (!isset($_SESSION['login_attempts'])) $_SESSION['login_attempts'] = [];
+if (!isset($_SESSION['login_block'])) $_SESSION['login_block'] = [];
+// Vérifier blocage
+if (isset($_SESSION['login_block'][$blockKey]) && $_SESSION['login_block'][$blockKey] > time()) {
+    $errors[] = "Trop de tentatives échouées. Veuillez réessayer dans " . ceil(($_SESSION['login_block'][$blockKey] - time())/60) . " minutes.";
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
     $remember = isset($_POST['remember']);
@@ -12,6 +20,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$email]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($user && password_verify($password, $user['password'])) {
+            // Réinitialise les tentatives
+            $_SESSION['login_attempts'][$blockKey] = 0;
+            unset($_SESSION['login_block'][$blockKey]);
             // Génère un token unique
             $token = bin2hex(random_bytes(32));
             $_SESSION['user'] = [
@@ -22,11 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'token' => $token,
                 'role' => $user['role'] ?? 'user'
             ];
-            // Cookie 'remember me' (30 jours)
             if ($remember) {
                 setcookie('rememberme', $token, time() + 60*60*24*30, '/', '', false, true);
             }
-            // Enregistre la connexion en base
             $stmt = $pdo->prepare('INSERT INTO user_logins (user_id, token, ip, user_agent, login_time) VALUES (?, ?, ?, ?, NOW())');
             $stmt->execute([
                 $user['id'],
@@ -34,15 +43,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SERVER['REMOTE_ADDR'],
                 $_SERVER['HTTP_USER_AGENT'] ?? ''
             ]);
-            // Redirection selon le rôle
             if ($_SESSION['user']['role'] === 'admin') {
-                header('Location: dashboard.php');
+                header('Location: admin_dashboard.php');
             } else {
                 header('Location: index.php');
             }
             exit;
         } else {
-            $errors[] = "Identifiants incorrects.";
+            // Incrémente les tentatives
+            $_SESSION['login_attempts'][$blockKey] = ($_SESSION['login_attempts'][$blockKey] ?? 0) + 1;
+            if ($_SESSION['login_attempts'][$blockKey] >= $maxAttempts) {
+                $_SESSION['login_block'][$blockKey] = time() + $blockDuration;
+                $errors[] = "Trop de tentatives échouées. Veuillez réessayer dans " . ceil($blockDuration/60) . " minutes.";
+            } else {
+                $errors[] = "Identifiants incorrects. Tentative " . $_SESSION['login_attempts'][$blockKey] . "/$maxAttempts.";
+            }
         }
     } catch (PDOException $e) {
         $errors[] = "Erreur serveur.";

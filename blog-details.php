@@ -1,26 +1,46 @@
-<?php
 $pageTitle = "Détail du blog";
 include 'partials/header.php';
 include 'partials/navbar.php';
 
 // Contrôle d'accès
-$allowedPages = ['blog-details.php'];
-if (!in_array(basename($_SERVER['PHP_SELF']), $allowedPages)) {
-    header('Location: index.php');
+// Récupère l'id du blog
+$blogId = isset($_GET['id']) ? intval($_GET['id']) : 0;
+if (!$blogId) {
+    header('Location: blog.php');
     exit;
 }
+
+$pdo = new PDO('mysql:host=localhost;dbname=mefamily;charset=utf8', 'root', '');
+$stmt = $pdo->prepare('SELECT * FROM blog WHERE id = ? AND status = "approved"');
+$stmt->execute([$blogId]);
+$blog = $stmt->fetch(PDO::FETCH_ASSOC);
+if (!$blog) {
+    echo '<div class="container py-5"><div class="alert alert-warning">Article introuvable ou non approuvé.</div></div>';
+    include 'partials/footer.php';
+    exit;
+}
+<?php
+$pageTitle = "Détail du blog";
+// Récupère l'id du blog
+$blogId = isset($_GET['id']) ? intval($_GET['id']) : 0;
+if (!$blogId) {
+    header('Location: blog.php');
+    exit;
+}
+$pdo = new PDO('mysql:host=localhost;dbname=mefamily;charset=utf8', 'root', '');
+$stmt = $pdo->prepare('SELECT * FROM blog WHERE id = ? AND status = "approved"');
+$stmt->execute([$blogId]);
+$blog = $stmt->fetch(PDO::FETCH_ASSOC);
+if (!$blog) {
+    include 'partials/header.php';
+    include 'partials/navbar.php';
+    echo '<div class="container py-5"><div class="alert alert-warning">Article introuvable ou non approuvé.</div></div>';
+    include 'partials/footer.php';
+    exit;
+}
+include 'partials/header.php';
+include 'partials/navbar.php';
 ?>
-
-<main class="main">
-
-    <!-- Titre de la page -->
-    <div class="page-title light-background">
-        <div class="container d-lg-flex justify-content-between align-items-center">
-            <h1 class="mb-2 mb-lg-0">Détail de l'article</h1>
-            <nav class="breadcrumbs">
-                <ol>
-                    <li><a href="index.php">Accueil</a></li>
-                    <li><a href="blog.php">Blog familial</a></li>
                     <li class="current">Détail de l'article</li>
                 </ol>
             </nav>
@@ -33,33 +53,24 @@ if (!in_array(basename($_SERVER['PHP_SELF']), $allowedPages)) {
             <div class="row">
                 <div class="col-lg-8 entries">
                     <article class="entry entry-single">
-
                         <div class="entry-img">
-                            <img src="assets/img/blog/blog-1.jpg" alt="" class="img-fluid">
+                            <?php if (!empty($blog['image'])): ?>
+                                <img src="<?= htmlspecialchars($blog['image']) ?>" alt="Image blog" class="img-fluid">
+                            <?php endif; ?>
                         </div>
-
                         <h2 class="entry-title">
-                            Un moment inoubliable partagé en famille
+                            <?= htmlspecialchars($blog['title']) ?>
                         </h2>
                         <div class="entry-meta">
                             <ul>
-                                <li><i class="bi bi-person"></i> <a href="#">Maria Dupont</a></li>
-                                <li><i class="bi bi-clock"></i> <a href="#"><time datetime="2022-01-01">1 Janv.
-                                            2022</time></a></li>
-                                <li><i class="bi bi-chat-dots"></i> <a href="#">12 commentaires</a></li>
+                                <li><i class="bi bi-person"></i> <a href="#">Auteur inconnu</a></li>
+                                <li><i class="bi bi-clock"></i> <a href="#"><time datetime="<?= htmlspecialchars($blog['created_at']) ?>"><?= date('d/m/Y', strtotime($blog['created_at'])) ?></time></a></li>
+                                <!-- <li><i class="bi bi-chat-dots"></i> <a href="#">0 commentaires</a></li> -->
                             </ul>
                         </div>
                         <div class="entry-content">
-                            <p>
-                                Nous avons passé une journée extraordinaire entourés de toute la famille. Rires,
-                                souvenirs et moments précieux étaient au rendez-vous.
-                            </p>
-                            <p>
-                                Merci à tous pour votre présence et votre bonne humeur ! Ce sont ces instants qui
-                                rendent notre famille si unique et soudée.
-                            </p>
+                            <?= nl2br(htmlspecialchars($blog['content'])) ?>
                         </div>
-
                     </article><!-- End blog entry -->
 
                     <!-- Comments Section (à adapter selon ton besoin) -->

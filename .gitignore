@@ -1,0 +1,63 @@
+# Node modules, vendor, and dependencies
+node_modules/
+assets/vendor/
+
+# Build outputs
+/dist/
+/build/
+
+# PHP/Composer
+vendor/
+composer.lock
+
+# IDE and OS files
+.vscode/
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Environment and config
+.env
+.env.*
+
+# Uploaded images and user files
+assets/img/gallery/
+assets/img/events/
+assets/img/blog/
+
+# Database and backups
+*.sql
+*.sqlite
+*.bak
+
+# Cache
+.cache/
+
+# WAMP/Local config
+wamp64/
+
+# Personal files
+*.swp
+*.swo
+
+# Ignore sensitive files
+config.php
+settings.php
+
+# Ignore forms data
+forms/
+
+# Ignore session files
+sessions/
+
+# Ignore backup files
+*.bak
+*.old
+
+# Ignore generated files
+*.min.js
+*.min.css
+
+# Ignore notebook files
+*.ipynb

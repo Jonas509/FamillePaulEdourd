@@ -32,19 +32,33 @@ if (!in_array(basename($_SERVER['PHP_SELF']), $allowedPages)) {
 }
 ?>
 <main class="main">
+    <!-- Breadcrumb navigation -->
+    <div class="page-title light-background position-relative">
+        <div class="container d-lg-flex justify-content-between align-items-center">
+            <h1 class="mb-2 mb-lg-0">Galerie</h1>
+            <nav class="breadcrumbs">
+                <ol>
+                    <li><a href="index.php">Home</a></li>
+                    <li class="current">Galerie</li>
+                </ol>
+            </nav>
+        </div>
+    </div><!-- End Page Title -->
     <div class="container py-5">
-        <h2 class="mb-4">Galerie familiale</h2>
-        <div class="row g-2 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0 fw-bold" style="color:#24325d;">Galerie familiale</h2>
+            <span class="badge bg-primary fs-6">Total : <?= $totalPhotos ?></span>
+        </div>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mb-4">
             <?php if (!empty($galleryPhotos)): ?>
             <?php foreach ($galleryPhotos as $img): ?>
-            <div class="col-4">
-                <div class="gallery-img-wrapper"
-                    style="position:relative;overflow:hidden;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+            <div class="col">
+                <div class="card border-0 shadow-sm h-100 gallery-img-wrapper position-relative" style="overflow:hidden;">
                     <img src="<?= htmlspecialchars($img) ?>" class="img-fluid w-100 gallery-clickable"
                         alt="Photo utilisateur" loading="lazy"
-                        style="aspect-ratio:1/1;object-fit:cover;transition:transform 0.3s;cursor:pointer;"
+                        style="aspect-ratio:1/1;object-fit:cover;transition:transform 0.3s;cursor:pointer;border-radius:10px;"
                         onerror="this.src='assets/img/gallery/gallery-empty.png'" onclick="showLightbox(this.src)"
-                        onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'">
+                        onmouseover="this.style.transform='scale(1.08)'" onmouseout="this.style.transform='scale(1)'"></img>
                 </div>
             </div>
             <?php endforeach; ?>
@@ -70,7 +84,7 @@ if (!in_array(basename($_SERVER['PHP_SELF']), $allowedPages)) {
 </main>
 <div id="gallery-lightbox"
     style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);align-items:center;justify-content:center;z-index:9999;">
-    <img src="" style="max-width:90vw;max-height:90vh;border-radius:10px;box-shadow:0 2px 16px #000;">
+    <img src="" style="max-width:90vw;max-height:90vh;border-radius:16px;box-shadow:0 2px 24px #000;">
     <span style="position:absolute;top:20px;right:40px;font-size:48px;color:#fff;cursor:pointer;z-index:10000;"
         onclick="document.getElementById('gallery-lightbox').style.display='none'">&times;</span>
 </div>

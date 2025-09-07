@@ -31,6 +31,9 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                 <li><a href="our-story.php"
                         class="<?php echo ($currentPage == 'our-story.php') ? 'active' : ''; ?>">Notre histoire</a></li>
                 <?php if (isset($_SESSION['user'])): ?>
+                <?php if ($_SESSION['user']['role'] === 'admin'): ?>
+                <li><a href="admin_dashboard.php" class="<?php echo ($currentPage == 'admin_dashboard.php') ? 'active' : ''; ?>">Dashboard Admin</a></li>
+                <?php endif; ?>
                 <li><a href="events.php"
                         class="<?php echo ($currentPage == 'events.php') ? 'active' : ''; ?>">Événements</a></li>
                 <li><a href="gallery.php"

@@ -54,27 +54,51 @@ include 'partials/navbar.php';
 
 <main class="main">
 
-    <!-- Section Héros -->
-    <section id="hero" class="hero section dark-background">
-        <div id="hero-carousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
-            <div class="carousel-item active">
-                <img src="assets/img/hero-carousel/hero-carousel-1.jpg" alt="Bannière famille 1">
-            </div><!-- Fin Élément Carousel -->
-            <div class="carousel-item">
-                <img src="assets/img/hero-carousel/hero-carousel-2.jpg" alt="Bannière famille 2">
-            </div><!-- Fin Élément Carousel -->
-            <div class="carousel-item">
-                <img src="assets/img/hero-carousel/hero-carousel-3.jpg" alt="Bannière famille 3">
-            </div><!-- Fin Élément Carousel -->
-            <a class="carousel-control-prev" href="#hero-carousel" role="button" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon bi bi-chevron-left" aria-hidden="true"></span>
-            </a>
-            <a class="carousel-control-next" href="#hero-carousel" role="button" data-bs-slide="next">
-                <span class="carousel-control-next-icon bi bi-chevron-right" aria-hidden="true"></span>
-            </a>
-            <ol class="carousel-indicators"></ol>
+    <!-- Section Héros moderne -->
+    <section id="hero" class="hero section py-5" style="background: linear-gradient(120deg, #f8fafc 60%, #e3f0ff 100%); min-height: 350px;">
+        <div class="container text-center py-5">
+            <h1 class="display-4 fw-bold mb-3" style="color:#24325d;">Bienvenue sur <span style="color:#006fbe;">Me &amp; Family</span></h1>
+            <p class="lead mb-4" style="max-width:600px;margin:auto;">Retrouvez, partagez et célébrez l'histoire de votre famille dans un espace moderne, sécurisé et convivial.</p>
+            <a href="register.php" class="btn btn-primary btn-lg shadow-sm me-2">Rejoindre la famille</a>
+            <a href="gallery.php" class="btn btn-outline-primary btn-lg">Voir la galerie</a>
         </div>
-    </section><!-- /Section Héros -->
+    </section>
+
+    <!-- Blocs modernes -->
+    <section class="container py-5">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-diagram-3 display-3 mb-3 text-primary"></i>
+                        <h5 class="card-title mb-2">Créer votre arbre généalogique</h5>
+                        <p class="card-text">Ajoutez vos proches et visualisez les liens familiaux sous forme d'arbre graphique ou textuel.</p>
+                        <a href="view_family_links_graph.php" class="btn btn-outline-primary">Voir l'arbre graphique</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-images display-3 mb-3 text-primary"></i>
+                        <h5 class="card-title mb-2">Partagez vos souvenirs</h5>
+                        <p class="card-text">Publiez des photos, des événements et des anecdotes pour enrichir la mémoire familiale.</p>
+                        <a href="gallery.php" class="btn btn-outline-primary">Accéder à la galerie</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-people display-3 mb-3 text-primary"></i>
+                        <h5 class="card-title mb-2">Restez connectés</h5>
+                        <p class="card-text">Discutez, commentez et organisez des événements pour renforcer les liens familiaux.</p>
+                        <a href="events.php" class="btn btn-outline-primary">Voir les événements</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- Section À propos -->
     <section id="about" class="about section">
@@ -248,6 +272,45 @@ $recentPhotos = $stmt->fetchAll(PDO::FETCH_COLUMN);
             </div>
         </div>
     </section><!-- /Section Photos récentes -->
+
+    <!-- Section Derniers articles du blog -->
+    <section id="recent-blog" class="recent-blog section">
+        <div class="container section-title" data-aos="fade-up">
+            <h2>Derniers articles du blog</h2>
+            <p>Découvrez les dernières histoires et actualités partagées par votre famille.</p>
+        </div>
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+            <div class="row gy-4">
+                <?php
+                $pdo = new PDO('mysql:host=localhost;dbname=mefamily;charset=utf8', 'root', '');
+                $posts = $pdo->query("SELECT id, title, content, image, created_at FROM blog WHERE status = 'approved' ORDER BY created_at DESC LIMIT 3")->fetchAll(PDO::FETCH_ASSOC);
+                ?>
+                <?php if (!empty($posts)): ?>
+                    <?php foreach ($posts as $post): ?>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow h-100">
+                            <?php if (!empty($post['image'])): ?>
+                            <img src="<?= htmlspecialchars($post['image']) ?>" class="card-img-top" alt="Image blog" style="height:180px;object-fit:cover;">
+                            <?php endif; ?>
+                            <div class="card-body">
+                                <h5 class="card-title mb-2"><?= htmlspecialchars($post['title']) ?></h5>
+                                <p class="card-text" style="font-size:0.95em;">
+                                    <?= htmlspecialchars(mb_strimwidth(strip_tags($post['content']), 0, 120, '...')) ?>
+                                </p>
+                                <a href="blog-details.php?id=<?= $post['id'] ?>" class="btn btn-outline-primary btn-sm">Lire la suite</a>
+                            </div>
+                            <div class="card-footer text-muted small">
+                                <i class="bi bi-calendar-event me-1"></i> <?= date('d/m/Y', strtotime($post['created_at'])) ?>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="col-12 text-center text-muted">Aucun article récent</div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </section><!-- /Section Derniers articles du blog -->
 
 </main>
 <?php
