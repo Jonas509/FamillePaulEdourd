@@ -76,7 +76,11 @@ if (!defined('NAVBAR_INCLUDED')) {
             position: relative;
             overflow: hidden;
         }
-        .hero-section:before {
+        git add composer.json
+        git commit -m "Ajout du composer.json pour gestion des dépendances PHP"
+        git push        git add composer.json
+        git commit -m "Ajout du composer.json pour gestion des dépendances PHP"
+        git push        .hero-section:before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
