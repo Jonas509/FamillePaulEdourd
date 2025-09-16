@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once 'partials/auth.php';
 if (!isset($_SESSION['user'])) {
     header('Location: login.php');
     exit;
@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['photo']) && $_FILES[
     $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
     if (in_array($_FILES['photo']['type'], $allowedTypes)) {
         if (move_uploaded_file($_FILES['photo']['tmp_name'], $targetPath)) {
-            $pdo = new PDO('mysql:host=localhost;dbname=mefamily;charset=utf8', 'root', '');
+            include 'partials/db.php';
             $stmt = $pdo->prepare('INSERT INTO photos (user_id, filename) VALUES (?, ?)');
             $stmt->execute([$userId, $targetPath]);
             // Recharge la page pour afficher la nouvelle photo
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['photo']) && $_FILES[
 if (isset($_GET['delete_photo'])) {
     $photoId = intval($_GET['delete_photo']);
     $userId = $_SESSION['user']['id'];
-    $pdo = new PDO('mysql:host=localhost;dbname=mefamily;charset=utf8', 'root', '');
+    include 'partials/db.php';
     $stmt = $pdo->prepare('SELECT filename FROM photos WHERE id = ? AND user_id = ?');
     $stmt->execute([$photoId, $userId]);
     $photo = $stmt->fetchColumn();
@@ -54,7 +54,10 @@ if (isset($_GET['delete_photo'])) {
 
 $pageTitle = "Mon compte";
 include 'partials/header.php';
-include 'partials/navbar.php';
+if (!defined('NAVBAR_INCLUDED')) {
+    define('NAVBAR_INCLUDED', true);
+    include 'partials/navbar.php';
+}
 ?>
 
 <?php

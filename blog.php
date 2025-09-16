@@ -1,16 +1,26 @@
 <?php
 $pageTitle = "Blog";
+require_once 'partials/auth.php';
 include 'partials/header.php';
-include 'partials/navbar.php';
-$pdo = new PDO('mysql:host=localhost;dbname=mefamily;charset=utf8', 'root', '');
+if (!defined('NAVBAR_INCLUDED')) {
+    define('NAVBAR_INCLUDED', true);
+    include 'partials/navbar.php';
+}
+include 'partials/db.php';
 // Contrôle d'accès
 $allowedPages = ['blog.php'];
 if (!in_array(basename($_SERVER['PHP_SELF']), $allowedPages)) {
     header('Location: index.php');
     exit;
 }
-// Récupérer les articles du blog
-$posts = $pdo->query("SELECT * FROM blog WHERE status = 'approved' ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
+
+// Pagination dynamique
+$postsPerPage = 6;
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $postsPerPage;
+$totalPosts = $pdo->query("SELECT COUNT(*) FROM blog WHERE status = 'approved'")->fetchColumn();
+$totalPages = ceil($totalPosts / $postsPerPage);
+$posts = $pdo->query("SELECT id, title, category, content, author, author_img, image, created_at FROM blog WHERE status = 'approved' ORDER BY created_at DESC LIMIT $postsPerPage OFFSET $offset")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <main class="main">
@@ -95,10 +105,23 @@ $posts = $pdo->query("SELECT * FROM blog WHERE status = 'approved' ORDER BY crea
                 $imagePath = null;
                 if (!empty($_FILES['image']['name'])) {
                     $uploadDir = 'assets/img/blog/';
-                    $filename = uniqid('blog_') . '_' . basename($_FILES['image']['name']);
-                    $targetPath = $uploadDir . $filename;
-                    if (move_uploaded_file($_FILES['image']['tmp_name'], $targetPath)) {
-                        $imagePath = $targetPath;
+                    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                    $allowedExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                    $maxSize = 2 * 1024 * 1024; // 2 Mo
+                    $fileType = mime_content_type($_FILES['image']['tmp_name']);
+                    $fileExt = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+                    $fileSize = $_FILES['image']['size'];
+                    $isImage = getimagesize($_FILES['image']['tmp_name']);
+                    if (!in_array($fileType, $allowedTypes) || !in_array($fileExt, $allowedExts) || !$isImage) {
+                        echo '<div class="alert alert-danger mt-3">Format d\'image non autorisé.</div>';
+                    } elseif ($fileSize > $maxSize) {
+                        echo '<div class="alert alert-danger mt-3">Image trop volumineuse (max 2 Mo).</div>';
+                    } else {
+                        $filename = uniqid('blog_') . '_' . basename($_FILES['image']['name']);
+                        $targetPath = $uploadDir . $filename;
+                        if (move_uploaded_file($_FILES['image']['tmp_name'], $targetPath)) {
+                            $imagePath = $targetPath;
+                        }
                     }
                 }
                 if ($title && $category && $content) {
@@ -140,23 +163,40 @@ $posts = $pdo->query("SELECT * FROM blog WHERE status = 'approved' ORDER BY crea
         </div>
     </section><!-- /Blog Posts Section -->
 
-    <!-- Pagination du blog -->
+
+    <!-- Pagination du blog dynamique -->
+    <?php if ($totalPages > 1): ?>
     <section id="blog-pagination" class="blog-pagination section">
         <div class="container">
             <nav aria-label="Pagination blog">
                 <ul class="pagination justify-content-center">
-                    <li class="page-item"><a class="page-link" href="#"><i class="bi bi-chevron-left"></i></a></li>
-                    <li class="page-item"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item active"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item"><a class="page-link" href="#">4</a></li>
-                    <li class="page-item disabled"><span class="page-link">...</span></li>
-                    <li class="page-item"><a class="page-link" href="#">10</a></li>
-                    <li class="page-item"><a class="page-link" href="#"><i class="bi bi-chevron-right"></i></a></li>
+                    <li class="page-item<?= ($page <= 1 ? ' disabled' : '') ?>">
+                        <a class="page-link" href="?page=<?= max(1, $page-1) ?>" tabindex="-1"><i class="bi bi-chevron-left"></i></a>
+                    </li>
+                    <?php
+                    $start = max(1, $page - 2);
+                    $end = min($totalPages, $page + 2);
+                    if ($start > 1) {
+                        echo '<li class="page-item"><a class="page-link" href="?page=1">1</a></li>';
+                        if ($start > 2) echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                    }
+                    for ($i = $start; $i <= $end; $i++) {
+                        $active = $i == $page ? ' active' : '';
+                        echo "<li class='page-item$active'><a class='page-link' href='?page=$i'>$i</a></li>";
+                    }
+                    if ($end < $totalPages) {
+                        if ($end < $totalPages - 1) echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                        echo "<li class='page-item'><a class='page-link' href='?page=$totalPages'>$totalPages</a></li>";
+                    }
+                    ?>
+                    <li class="page-item<?= ($page >= $totalPages ? ' disabled' : '') ?>">
+                        <a class="page-link" href="?page=<?= min($totalPages, $page+1) ?>"><i class="bi bi-chevron-right"></i></a>
+                    </li>
                 </ul>
             </nav>
         </div>
-    </section><!-- /Pagination du blog -->
+    </section>
+    <?php endif; ?>
 
 </main>
 <?php

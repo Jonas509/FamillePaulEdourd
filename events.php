@@ -1,8 +1,12 @@
 <?php
 $pageTitle = "Événements familiaux";
+require_once 'partials/auth.php';
 include 'partials/header.php';
-include 'partials/navbar.php';
-$pdo = new PDO('mysql:host=localhost;dbname=mefamily;charset=utf8', 'root', '');
+if (!defined('NAVBAR_INCLUDED')) {
+    define('NAVBAR_INCLUDED', true);
+    include 'partials/navbar.php';
+}
+include 'partials/db.php';
 // Récupérer les anniversaires à venir
 // Anniversaires dans les 5 prochains jours
 $today = new DateTime();
@@ -32,7 +36,7 @@ foreach ($anniversaires as $m) {
 // Récupérer les événements programmés (si table events existe)
 $customEvents = [];
 try {
-    $customEvents = $pdo->query('SELECT * FROM events ORDER BY event_date ASC')->fetchAll(PDO::FETCH_ASSOC);
+    $customEvents = $pdo->query('SELECT id, user_id, title, description, event_date, photo FROM events ORDER BY event_date ASC')->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     // Table events non présente
 }

@@ -1,7 +1,10 @@
 <?php
 $pageTitle = "Inscription";
 include 'partials/header.php';
-include 'partials/navbar.php';
+if (!defined('NAVBAR_INCLUDED')) {
+    define('NAVBAR_INCLUDED', true);
+    include 'partials/navbar.php';
+}
 ?>
 <main class="main">
     <div class="container py-5">
@@ -39,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         // Connexion à la base de données
         try {
-            $pdo = new PDO('mysql:host=localhost;dbname=mefamily;charset=utf8', 'root', '');
+            include 'partials/db.php';
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $e) {
             $errors[] = "Erreur de connexion à la base de données.";
@@ -115,32 +118,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
                                     title="Format email valide" value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
                             </div>
-                            <div class="mb-3 position-relative">
+                            <div class="mb-3">
                                 <label for="password" class="form-label">Mot de passe</label>
-                                <input type="password" class="form-control" id="password" name="password" required
-                                    pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$"
-                                    title="Min. 8 caractères, au moins une lettre et un chiffre"
-                                    oninput="updateStrengthBar()">
-                                <button type="button"
-                                    class="btn btn-outline-secondary btn-sm position-absolute top-50 end-0 translate-middle-y"
-                                    style="z-index:2;" onclick="togglePwd('password', this)">
-                                    <i class="bi bi-eye" id="eye-password"></i>
-                                </button>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="password" name="password" required
+                                        pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$"
+                                        title="Min. 8 caractères, au moins une lettre et un chiffre"
+                                        oninput="updateStrengthBar()">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" style="z-index:2;" onclick="togglePwd('password', this)">
+                                        <i class="bi bi-eye" id="eye-password"></i>
+                                    </button>
+                                </div>
                                 <div class="progress mt-2" style="height: 5px;">
                                     <div id="pwd-strength-bar" class="progress-bar" role="progressbar"
                                         style="width: 0%; background-color: #dc3545;"></div>
                                 </div>
                             </div>
-                            <div class="mb-3 position-relative">
+                            <div class="mb-3">
                                 <label for="confirm_password" class="form-label">Confirmer le mot de passe</label>
-                                <input type="password" class="form-control" id="confirm_password"
-                                    name="confirm_password" required pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$"
-                                    title="Min. 8 caractères, au moins une lettre et un chiffre">
-                                <button type="button"
-                                    class="btn btn-outline-secondary btn-sm position-absolute top-50 end-0 translate-middle-y"
-                                    style="z-index:2;" onclick="togglePwd('confirm_password', this)">
-                                    <i class="bi bi-eye" id="eye-confirm"></i>
-                                </button>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="confirm_password"
+                                        name="confirm_password" required pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$"
+                                        title="Min. 8 caractères, au moins une lettre et un chiffre">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" style="z-index:2;" onclick="togglePwd('confirm_password', this)">
+                                        <i class="bi bi-eye" id="eye-confirm"></i>
+                                    </button>
+                                </div>
                             </div>
                             <button type="submit" class="btn btn-primary w-100">S'inscrire</button>
                         </form>

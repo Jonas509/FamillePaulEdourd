@@ -18,9 +18,9 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
 
         <a href="index.php" class="logo d-flex align-items-center">
-            <!-- Uncomment the line below if you also wish to use an image logo -->
-            <img src="assets/img/logo.png" alt="Logo famille Paul-Edourd">
-            <h4 class="sitename"> <strong>Famille</strong> Paul-Edourd</h4>
+            <i class="bi bi-people-fill" style="font-size:2rem;color:#0d6efd;margin-right:8px;"></i>
+            <!-- <img src="assets/img/logo.png" alt="Logo famille Paul-Edourd"> -->
+            <h4 class="sitename mb-0"> <strong>Famille</strong> Paul-Edourd</h4>
         </a>
 
         <nav id="navmenu" class="navmenu">

@@ -1,10 +1,14 @@
 <?php
 $pageTitle = "Arbre généalogique";
+require_once 'partials/auth.php';
 include 'partials/header.php';
-include 'partials/navbar.php';
-$pdo = new PDO('mysql:host=localhost;dbname=mefamily;charset=utf8', 'root', '');
+if (!defined('NAVBAR_INCLUDED')) {
+  define('NAVBAR_INCLUDED', true);
+  include 'partials/navbar.php';
+}
+include 'partials/db.php';
 // Récupérer tous les membres
-$members = $pdo->query('SELECT * FROM family_tree')->fetchAll(PDO::FETCH_ASSOC);
+$members = $pdo->query('SELECT id, firstname, lastname, birthdate, gender, father_id, mother_id, photo FROM family_tree')->fetchAll(PDO::FETCH_ASSOC);
 // Organiser par parent (père)
 $tree = [];
 foreach ($members as $m) {

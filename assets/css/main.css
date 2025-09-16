@@ -1,3 +1,6 @@
+h1, h2, h3, h4, h5, h6, .lead, p {
+  word-break: break-word;
+}
 /**
 * Template Name: MeFamily
 * Template URL: https://bootstrapmade.com/family-multipurpose-html-bootstrap-template-free/

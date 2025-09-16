@@ -1,7 +1,10 @@
 <?php
 $pageTitle = "Our Story";
 include 'partials/header.php';
-include 'partials/navbar.php';
+if (!defined('NAVBAR_INCLUDED')) {
+    define('NAVBAR_INCLUDED', true);
+    include 'partials/navbar.php';
+}
 
 $allowedPages = ['our-story.php'];
 if (!in_array(basename($_SERVER['PHP_SELF']), $allowedPages)) {

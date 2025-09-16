@@ -1,12 +1,15 @@
 <?php
-session_start();
+require_once 'partials/auth.php';
 if (!isset($_SESSION['user'])) {
     header('Location: login.php');
     exit;
 }
 $pageTitle = "Paramètres du compte";
 include 'partials/header.php';
-include 'partials/navbar.php';
+if (!defined('NAVBAR_INCLUDED')) {
+    define('NAVBAR_INCLUDED', true);
+    include 'partials/navbar.php';
+}
 $pdo = new PDO('mysql:host=localhost;dbname=mefamily;charset=utf8', 'root', '');
 $user_id = $_SESSION['user']['id'];
 // Récupérer les infos actuelles
@@ -15,6 +18,22 @@ $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 // Traitement du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['firstname'])) {
+// Suppression de la photo de profil
+if (isset($_POST['delete_profile_photo'])) {
+    $oldPhoto = $user['profile_photo'] ?? '';
+    if ($oldPhoto && file_exists($oldPhoto) && strpos($oldPhoto, 'assets/img/avatar-default.png') === false) {
+        unlink($oldPhoto);
+    }
+    $stmt = $pdo->prepare('UPDATE users SET profile_photo = NULL WHERE id = ?');
+    $stmt->execute([$user_id]);
+    // Mettre à jour la session si besoin
+    $_SESSION['user']['profile_photo'] = '';
+    // Rafraîchir les données utilisateur
+    $stmt = $pdo->prepare('SELECT * FROM users WHERE id = ?');
+    $stmt->execute([$user_id]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    echo '<div class="alert alert-success mt-3">Photo de profil supprimée.</div>';
+}
     $fields = [
         'firstname' => $_POST['firstname'],
         'lastname' => $_POST['lastname'],
@@ -28,13 +47,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['firstname'])) {
         'gender' => $_POST['gender'],
         'privacy' => $_POST['privacy']
     ];
-    // Photo de profil
+    // Photo de profil sécurisée
     if (!empty($_FILES['profile_photo']['name'])) {
         $uploadDir = 'assets/img/gallery/';
-        $filename = uniqid('profile_') . '_' . basename($_FILES['profile_photo']['name']);
-        $targetPath = $uploadDir . $filename;
-        if (move_uploaded_file($_FILES['profile_photo']['tmp_name'], $targetPath)) {
-            $fields['profile_photo'] = $targetPath;
+        $maxSize = 2 * 1024 * 1024; // 2 Mo
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $fileType = mime_content_type($_FILES['profile_photo']['tmp_name']);
+        $fileSize = $_FILES['profile_photo']['size'];
+        $isImage = getimagesize($_FILES['profile_photo']['tmp_name']);
+        if (!in_array($fileType, $allowedTypes)) {
+            echo '<div class="alert alert-danger mt-3">Format de fichier non autorisé. (jpg, png, gif, webp)</div>';
+        } elseif ($fileSize > $maxSize) {
+            echo '<div class="alert alert-danger mt-3">La taille de la photo ne doit pas dépasser 2 Mo.</div>';
+        } elseif ($isImage === false) {
+            echo '<div class="alert alert-danger mt-3">Le fichier n\'est pas une image valide.</div>';
+        } else {
+            $filename = uniqid('profile_') . '_' . basename($_FILES['profile_photo']['name']);
+            $targetPath = $uploadDir . $filename;
+            if (move_uploaded_file($_FILES['profile_photo']['tmp_name'], $targetPath)) {
+                $fields['profile_photo'] = $targetPath;
+            } else {
+                echo '<div class="alert alert-danger mt-3">Erreur lors de l\'enregistrement du fichier.</div>';
+            }
         }
     }
     // Mot de passe
@@ -134,11 +168,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['firstname'])) {
                                 <?php if (!empty($user['profile_photo'])): ?>
                                 <img src="<?= htmlspecialchars($user['profile_photo']) ?>" alt="Photo de profil"
                                     class="rounded mt-2" style="max-width:100px;max-height:100px;">
+                                <form method="post" style="display:inline;">
+                                    <input type="hidden" name="delete_profile_photo" value="1">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger ms-2" onclick="return confirm('Supprimer la photo de profil ?');">Supprimer</button>
+                                </form>
                                 <?php endif; ?>
                             </div>
                             <div class="mb-3">
                                 <label for="password" class="form-label">Nouveau mot de passe</label>
-                                <input type="password" class="form-control" id="password" name="password">
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="password" name="password">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" style="z-index:2;" onclick="togglePwd('password', this)">
+                                        <i class="bi bi-eye" id="eye-settings"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label for="privacy" class="form-label">Confidentialité du profil</label>

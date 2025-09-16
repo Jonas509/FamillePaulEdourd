@@ -6,8 +6,11 @@ if (!isset($_SESSION['user']) || ($_SESSION['user']['role'] ?? '') !== 'admin') 
 }
 $pageTitle = "Validation des articles";
 include 'partials/header.php';
-include 'partials/navbar.php';
-$pdo = new PDO('mysql:host=localhost;dbname=mefamily;charset=utf8', 'root', '');
+if (!defined('NAVBAR_INCLUDED')) {
+    define('NAVBAR_INCLUDED', true);
+    include 'partials/navbar.php';
+}
+include 'partials/db.php';
 // Validation ou suppression
 if (isset($_POST['action'], $_POST['id'])) {
     $id = intval($_POST['id']);
@@ -18,7 +21,7 @@ if (isset($_POST['action'], $_POST['id'])) {
     }
 }
 // Récupérer les articles en attente
-$pending = $pdo->query('SELECT * FROM blog WHERE status = "pending" ORDER BY created_at DESC')->fetchAll(PDO::FETCH_ASSOC);
+$pending = $pdo->query('SELECT id, title, category, content, author, author_img, image, created_at FROM blog WHERE status = "pending" ORDER BY created_at DESC')->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <main class="main">
     <div class="container py-5">

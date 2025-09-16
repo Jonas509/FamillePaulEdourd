@@ -1,7 +1,10 @@
 <?php 
 $pageTitle = "Contact";
 include 'partials/header.php';
-include 'partials/navbar.php';
+if (!defined('NAVBAR_INCLUDED')) {
+    define('NAVBAR_INCLUDED', true);
+    include 'partials/navbar.php';
+}
 
 // Redirection if the page is accessed directly or the URL is modified
 $allowedPages = ['contact.php'];

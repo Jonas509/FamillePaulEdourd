@@ -1,6 +1,9 @@
 $pageTitle = "Détail du blog";
 include 'partials/header.php';
-include 'partials/navbar.php';
+if (!defined('NAVBAR_INCLUDED')) {
+    define('NAVBAR_INCLUDED', true);
+    include 'partials/navbar.php';
+}
 
 // Contrôle d'accès
 // Récupère l'id du blog
@@ -10,8 +13,8 @@ if (!$blogId) {
     exit;
 }
 
-$pdo = new PDO('mysql:host=localhost;dbname=mefamily;charset=utf8', 'root', '');
-$stmt = $pdo->prepare('SELECT * FROM blog WHERE id = ? AND status = "approved"');
+include 'partials/db.php';
+$stmt = $pdo->prepare('SELECT id, title, category, content, author, author_img, image, created_at FROM blog WHERE id = ? AND status = "approved"');
 $stmt->execute([$blogId]);
 $blog = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$blog) {
@@ -27,8 +30,8 @@ if (!$blogId) {
     header('Location: blog.php');
     exit;
 }
-$pdo = new PDO('mysql:host=localhost;dbname=mefamily;charset=utf8', 'root', '');
-$stmt = $pdo->prepare('SELECT * FROM blog WHERE id = ? AND status = "approved"');
+include 'partials/db.php';
+$stmt = $pdo->prepare('SELECT id, title, category, content, author, author_img, image, created_at FROM blog WHERE id = ? AND status = "approved"');
 $stmt->execute([$blogId]);
 $blog = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$blog) {

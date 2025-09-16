@@ -14,7 +14,7 @@ if (isset($_SESSION['login_block'][$blockKey]) && $_SESSION['login_block'][$bloc
     $password = $_POST['password'] ?? '';
     $remember = isset($_POST['remember']);
     try {
-        $pdo = new PDO('mysql:host=localhost;dbname=mefamily;charset=utf8', 'root', '');
+    include 'partials/db.php';
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $stmt = $pdo->prepare('SELECT * FROM users WHERE email = ?');
         $stmt->execute([$email]);
@@ -65,7 +65,10 @@ if (isset($_SESSION['login_block'][$blockKey]) && $_SESSION['login_block'][$bloc
 }
 $pageTitle = "Connexion";
 include 'partials/header.php';
-include 'partials/navbar.php';
+if (!defined('NAVBAR_INCLUDED')) {
+    define('NAVBAR_INCLUDED', true);
+    include 'partials/navbar.php';
+}
 ?>
 <main class="main">
     <div class="container py-5">
@@ -89,14 +92,14 @@ include 'partials/navbar.php';
                                 <input type="email" class="form-control" id="email" name="email" required
                                     value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
                             </div>
-                            <div class="mb-3 position-relative">
+                            <div class="mb-3">
                                 <label for="password" class="form-label">Mot de passe</label>
-                                <input type="password" class="form-control" id="password" name="password" required>
-                                <button type="button"
-                                    class="btn btn-outline-secondary btn-sm position-absolute top-50 end-0 translate-middle-y"
-                                    style="z-index:2;" onclick="togglePwd('password', this)">
-                                    <i class="bi bi-eye" id="eye-login"></i>
-                                </button>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="password" name="password" required>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" style="z-index:2;" onclick="togglePwd('password', this)">
+                                        <i class="bi bi-eye" id="eye-login"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div class="mb-3 form-check">
                                 <input type="checkbox" class="form-check-input" id="remember" name="remember">

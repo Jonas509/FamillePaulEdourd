@@ -6,8 +6,11 @@ if (!isset($_SESSION['user'])) {
 }
 $pageTitle = "Créer un article";
 include 'partials/header.php';
-include 'partials/navbar.php';
-$pdo = new PDO('mysql:host=localhost;dbname=mefamily;charset=utf8', 'root', '');
+if (!defined('NAVBAR_INCLUDED')) {
+    define('NAVBAR_INCLUDED', true);
+    include 'partials/navbar.php';
+}
+include 'partials/db.php';
 $success = null;
 $error = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

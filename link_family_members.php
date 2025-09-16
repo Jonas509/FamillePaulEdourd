@@ -1,13 +1,16 @@
 <?php
-session_start();
+require_once 'partials/auth.php';
 if (!isset($_SESSION['user'])) {
     header('Location: login.php');
     exit;
 }
 $pageTitle = "Lier deux membres de la famille";
 include 'partials/header.php';
-include 'partials/navbar.php';
-$pdo = new PDO('mysql:host=localhost;dbname=mefamily;charset=utf8', 'root', '');
+if (!defined('NAVBAR_INCLUDED')) {
+    define('NAVBAR_INCLUDED', true);
+    include 'partials/navbar.php';
+}
+include 'partials/db.php';
 $success = null;
 $error = null;
 // Récupérer tous les membres

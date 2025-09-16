@@ -1,15 +1,18 @@
 <?php
-session_start();
+require_once 'partials/auth.php';
 if (!isset($_SESSION['user'])) {
     header('Location: login.php');
     exit;
 }
 $pageTitle = "Voir les liens familiaux";
 include 'partials/header.php';
-include 'partials/navbar.php';
-$pdo = new PDO('mysql:host=localhost;dbname=mefamily;charset=utf8', 'root', '');
+if (!defined('NAVBAR_INCLUDED')) {
+    define('NAVBAR_INCLUDED', true);
+    include 'partials/navbar.php';
+}
+include 'partials/db.php';
 // Récupérer tous les membres
-$members = $pdo->query('SELECT * FROM family_tree')->fetchAll(PDO::FETCH_ASSOC);
+$members = $pdo->query('SELECT id, firstname, lastname, birthdate, gender, father_id, mother_id FROM family_tree')->fetchAll(PDO::FETCH_ASSOC);
 // Indexer par id
 $byId = [];
 foreach ($members as $m) {

@@ -1,6 +1,10 @@
 <?php
+require_once 'partials/auth.php';
 include 'partials/header.php';
-include 'partials/navbar.php';
+if (!defined('NAVBAR_INCLUDED')) {
+    define('NAVBAR_INCLUDED', true);
+    include 'partials/navbar.php';
+}
 ?>
 
 <main class="main">

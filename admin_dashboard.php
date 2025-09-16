@@ -6,8 +6,11 @@ if (!isset($_SESSION['user']) || ($_SESSION['user']['role'] ?? '') !== 'admin') 
 }
 $pageTitle = "Tableau de bord admin";
 include 'partials/header.php';
-include 'partials/navbar.php';
-$pdo = new PDO('mysql:host=localhost;dbname=mefamily;charset=utf8', 'root', '');
+if (!defined('NAVBAR_INCLUDED')) {
+    define('NAVBAR_INCLUDED', true);
+    include 'partials/navbar.php';
+}
+include 'partials/db.php';
 // Statistiques
 $nbUsers = $pdo->query('SELECT COUNT(*) FROM users')->fetchColumn();
 $nbFamily = $pdo->query('SELECT COUNT(*) FROM family_tree')->fetchColumn();

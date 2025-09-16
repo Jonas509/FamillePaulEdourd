@@ -1,0 +1,20 @@
+{
+    "name": "famille-paul-edourd/mefamily",
+    "description": "Site web familial moderne et sécurisé pour la famille Paul-Edourd.",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": ">=7.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Jonas509",
+            "role": "Owner"
+        }
+    ]
+}

@@ -1,6 +1,6 @@
 <?php
 // Formulaire pour lier père, mère, enfants à son profil
-$pdo = new PDO('mysql:host=localhost;dbname=mefamily;charset=utf8', 'root', '');
+include 'partials/db.php';
 $user_id = $_SESSION['user']['id'];
 // Récupérer le membre courant dans family_tree
 $stmt = $pdo->prepare('SELECT * FROM family_tree WHERE id = ?');
